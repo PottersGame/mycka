@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares which Device Administration policies DishwasherDuty uses.
+  force-lock: allows calling DevicePolicyManager.lockNow() to lock the screen.
+-->
+<device-admin>
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>
