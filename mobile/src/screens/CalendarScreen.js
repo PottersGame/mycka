@@ -65,9 +65,9 @@ export default function CalendarScreen() {
   useFocusEffect(useCallback(() => { load(); }, []));
 
   async function handleAdd() {
-    if (!title.trim()) return Alert.alert('Error', 'Title is required');
-    if (!dateStr.trim()) return Alert.alert('Error', 'Date is required');
-    if (!parentSecret) return Alert.alert('Parents only', 'Only parents can add events. Set your parent secret in Settings.');
+    if (!title.trim()) return Alert.alert('Chyba', 'Názov je povinný');
+    if (!dateStr.trim()) return Alert.alert('Chyba', 'Dátum je povinný');
+    if (!parentSecret) return Alert.alert('Len pre rodičov', 'Len rodičia môžu pridávať udalosti.');
 
     setSaving(true);
     try {
@@ -79,28 +79,28 @@ export default function CalendarScreen() {
       setShowModal(false);
       await load();
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(event) {
-    if (!parentSecret) return Alert.alert('Parents only', 'Only parents can delete events.');
+    if (!parentSecret) return Alert.alert('Len pre rodičov', 'Len rodičia môžu vymazávať udalosti.');
     Alert.alert(
-      'Delete event?',
-      `Remove "${event.title}"?`,
+      'Vymazať udalosť?',
+      `Odstrániť "${event.title}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Zrušiť', style: 'cancel' },
         {
-          text: 'Delete',
+          text: 'Vymazať',
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteCalendarEvent(event.id, parentSecret);
               setEvents(prev => prev.filter(e => e.id !== event.id));
             } catch (err) {
-              Alert.alert('Error', err.message);
+              Alert.alert('Chyba', err.message);
             }
           },
         },
@@ -125,13 +125,13 @@ export default function CalendarScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         ListHeaderComponent={
-          <Text style={styles.sectionTitle}>Upcoming events</Text>
+          <Text style={styles.sectionTitle}>Nadchádzajúce udalosti</Text>
         }
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>📅 No upcoming events</Text>
+            <Text style={styles.emptyText}>📅 Žiadne nadchádzajúce udalosti</Text>
             {!!parentSecret && (
-              <Text style={styles.emptySubText}>Tap + to add one</Text>
+              <Text style={styles.emptySubText}>Stlač + pre pridanie</Text>
             )}
           </View>
         }
@@ -149,7 +149,7 @@ export default function CalendarScreen() {
               <Text style={styles.eventTitle}>{item.title}</Text>
               {item.time_str ? <Text style={styles.eventTime}>🕐 {item.time_str}</Text> : null}
               {item.description ? <Text style={styles.eventDesc}>{item.description}</Text> : null}
-              {item.created_by ? <Text style={styles.eventBy}>Added by {item.created_by}</Text> : null}
+              {item.created_by ? <Text style={styles.eventBy}>Pridal(a) {item.created_by}</Text> : null}
             </View>
             {!!parentSecret && (
               <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -161,7 +161,7 @@ export default function CalendarScreen() {
         ListFooterComponent={
           past.length > 0 ? (
             <View style={{ marginTop: 24 }}>
-              <Text style={[styles.sectionTitle, { color: '#aaa' }]}>Past events</Text>
+              <Text style={[styles.sectionTitle, { color: '#aaa' }]}>Minulé udalosti</Text>
               {past.map(item => (
                 <View key={item.id} style={[styles.eventCard, styles.eventCardPast]}>
                   <Text style={styles.pastDate}>{formatDisplayDate(item.date_str)}</Text>
@@ -184,16 +184,16 @@ export default function CalendarScreen() {
       <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modal}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>New Event</Text>
+            <Text style={styles.modalTitle}>Nová udalosť</Text>
             <TouchableOpacity onPress={() => setShowModal(false)}>
               <Text style={styles.modalClose}>✕</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.modalBody}>
-            <Text style={styles.fieldLabel}>Title *</Text>
-            <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="e.g. Doctor appointment" />
+            <Text style={styles.fieldLabel}>Názov *</Text>
+            <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="napr. Lekár" />
 
-            <Text style={styles.fieldLabel}>Date (YYYY-MM-DD) *</Text>
+            <Text style={styles.fieldLabel}>Dátum (RRRR-MM-DD) *</Text>
             <TextInput
               style={styles.input}
               value={dateStr}
@@ -202,15 +202,15 @@ export default function CalendarScreen() {
               keyboardType="numbers-and-punctuation"
             />
 
-            <Text style={styles.fieldLabel}>Time (optional)</Text>
+            <Text style={styles.fieldLabel}>Čas (nepovinné)</Text>
             <TextInput style={styles.input} value={timeStr} onChangeText={setTimeStr} placeholder="14:30" keyboardType="numbers-and-punctuation" />
 
-            <Text style={styles.fieldLabel}>Notes (optional)</Text>
+            <Text style={styles.fieldLabel}>Poznámka (nepovinné)</Text>
             <TextInput
               style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
               value={description}
               onChangeText={setDesc}
-              placeholder="Any extra details…"
+              placeholder="Ďalšie detaily…"
               multiline
             />
 
@@ -219,7 +219,7 @@ export default function CalendarScreen() {
               onPress={handleAdd}
               disabled={saving}
             >
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Add Event</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Pridať udalosť</Text>}
             </TouchableOpacity>
           </ScrollView>
         </View>

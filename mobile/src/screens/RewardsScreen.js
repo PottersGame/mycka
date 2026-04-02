@@ -73,13 +73,13 @@ export default function RewardsScreen() {
           style={[styles.tabBtn, tab === 'leaderboard' && styles.tabBtnActive]}
           onPress={() => setTab('leaderboard')}
         >
-          <Text style={[styles.tabText, tab === 'leaderboard' && styles.tabTextActive]}>🏆 Leaderboard</Text>
+          <Text style={[styles.tabText, tab === 'leaderboard' && styles.tabTextActive]}>🏆 Rebríček</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabBtn, tab === 'mine' && styles.tabBtnActive]}
           onPress={() => setTab('mine')}
         >
-          <Text style={[styles.tabText, tab === 'mine' && styles.tabTextActive]}>⭐ My Points</Text>
+          <Text style={[styles.tabText, tab === 'mine' && styles.tabTextActive]}>⭐ Moje body</Text>
         </TouchableOpacity>
       </View>
 
@@ -92,7 +92,7 @@ export default function RewardsScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
           contentContainerStyle={{ padding: 16 }}
           ListHeaderComponent={
-            <Text style={styles.sectionTitle}>This week's chore champions</Text>
+            <Text style={styles.sectionTitle}>Hrdinovia tohto týždňa</Text>
           }
           renderItem={({ item, index }) => {
             const isMe = item.name === myName;
@@ -101,20 +101,20 @@ export default function RewardsScreen() {
                 <Text style={styles.medal}>{MEDALS[index] || `${index + 1}.`}</Text>
                 <View style={styles.leaderInfo}>
                   <Text style={[styles.leaderName, isMe && styles.leaderNameMe]}>
-                    {item.name}{isMe ? ' (you)' : ''}
+                    {item.name}{isMe ? ' (ty)' : ''}
                   </Text>
-                  <Text style={styles.leaderSub}>{item.chores_done} chore{item.chores_done !== 1 ? 's' : ''} done</Text>
+                  <Text style={styles.leaderSub}>{item.chores_done} splnených povinností</Text>
                 </View>
                 <View style={styles.pointsBubble}>
                   <Text style={styles.pointsNumber}>{item.total_points}</Text>
-                  <Text style={styles.pointsLabel}>pts</Text>
+                  <Text style={styles.pointsLabel}>b</Text>
                 </View>
               </View>
             );
           }}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No points yet — complete a chore to get started!</Text>
+              <Text style={styles.emptyText}>Zatiaľ žiadne body — splň povinnosť!</Text>
             </View>
           }
         />
@@ -126,16 +126,16 @@ export default function RewardsScreen() {
           {/* Personal total */}
           {myEntry && (
             <View style={styles.myTotalCard}>
-              <Text style={styles.myTotalLabel}>Your total</Text>
+              <Text style={styles.myTotalLabel}>Tvoje body celkom</Text>
               <Text style={styles.myTotalPoints}>{myEntry.total_points} ⭐</Text>
-              <Text style={styles.myTotalSub}>{myEntry.chores_done} chores completed</Text>
+              <Text style={styles.myTotalSub}>{myEntry.chores_done} povinností splnených</Text>
             </View>
           )}
 
-          <Text style={styles.sectionTitle}>Recent history</Text>
+          <Text style={styles.sectionTitle}>Posledné záznamy</Text>
 
           {history.length === 0 ? (
-            <Text style={styles.emptyText}>No points earned yet — do a chore!</Text>
+            <Text style={styles.emptyText}>Zatiaľ žiadne body – plň povinnosti!</Text>
           ) : (
             history.map(item => (
               <View key={item.earned_at + item.reason} style={styles.historyRow}>

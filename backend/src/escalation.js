@@ -100,7 +100,7 @@ async function runEscalation() {
       kidToken,
       msg.title,
       msg.body,
-      { type: 'lock', cycleId: cycle.id },  // App reacts to this by calling lockScreen()
+      { type: 'lock', cycleId: cycle.id, choreType: cycle.chore_type },
       'max',
     );
     markLock(cycle.id);

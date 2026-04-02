@@ -52,7 +52,7 @@ export default function ShoppingScreen() {
       setNewText('');
       await load();
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     } finally {
       setAdding(false);
     }
@@ -63,7 +63,7 @@ export default function ShoppingScreen() {
       await toggleShoppingItem(item.id, !item.done);
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, done: item.done ? 0 : 1 } : i));
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     }
   }
 
@@ -72,25 +72,25 @@ export default function ShoppingScreen() {
       await deleteShoppingItem(item.id);
       setItems(prev => prev.filter(i => i.id !== item.id));
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     }
   }
 
   async function handleClearDone() {
     Alert.alert(
-      'Clear done items?',
-      'This will remove all ticked items from the list.',
+      'Vymazať hotové položky?',
+      'Odstránia sa všetky zaškrtnuté položky zo zoznamu.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Zrušiť', style: 'cancel' },
         {
-          text: 'Clear',
+          text: 'Vymazať',
           style: 'destructive',
           onPress: async () => {
             try {
               await clearDoneShopping();
               await load();
             } catch (err) {
-              Alert.alert('Error', err.message);
+              Alert.alert('Chyba', err.message);
             }
           },
         },
@@ -108,7 +108,7 @@ export default function ShoppingScreen() {
         </TouchableOpacity>
         <View style={styles.rowContent}>
           <Text style={[styles.itemText, item.done && styles.itemTextDone]}>{item.text}</Text>
-          {item.added_by ? <Text style={styles.addedBy}>Added by {item.added_by}</Text> : null}
+          {item.added_by ? <Text style={styles.addedBy}>Pridal(a) {item.added_by}</Text> : null}
         </View>
         <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Text style={styles.deleteBtn}>✕</Text>
@@ -137,14 +137,14 @@ export default function ShoppingScreen() {
         ListHeaderComponent={
           doneCount > 0 ? (
             <TouchableOpacity style={styles.clearDoneBtn} onPress={handleClearDone}>
-              <Text style={styles.clearDoneText}>Clear {doneCount} done item{doneCount !== 1 ? 's' : ''}</Text>
+              <Text style={styles.clearDoneText}>Vymazať {doneCount} hotové položky</Text>
             </TouchableOpacity>
           ) : null
         }
         ListEmptyComponent={
           <View style={styles.centered}>
-            <Text style={styles.emptyText}>🛒 Shopping list is empty!</Text>
-            <Text style={styles.emptySubText}>Add items using the box below.</Text>
+            <Text style={styles.emptyText}>🛒 Nákupný zoznam je prázdny!</Text>
+            <Text style={styles.emptySubText}>Pridaj položky pomocou poľa nižšie.</Text>
           </View>
         }
       />
@@ -155,7 +155,7 @@ export default function ShoppingScreen() {
           style={styles.addInput}
           value={newText}
           onChangeText={setNewText}
-          placeholder="Add an item…"
+          placeholder="Pridaj položku…"
           returnKeyType="done"
           onSubmitEditing={handleAdd}
         />
@@ -164,7 +164,7 @@ export default function ShoppingScreen() {
           onPress={handleAdd}
           disabled={!newText.trim() || adding}
         >
-          {adding ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.addButtonText}>Add</Text>}
+          {adding ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.addButtonText}>Pridať</Text>}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

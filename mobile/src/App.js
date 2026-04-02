@@ -44,37 +44,37 @@ function MainTabs() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'FamilyDuty', tabBarIcon: tabIcon('🏠') }}
+        options={{ title: 'Hrnčiarovci', tabBarIcon: tabIcon('🏠') }}
       />
       <Tab.Screen
         name="Rewards"
         component={RewardsScreen}
-        options={{ title: 'Rewards', tabBarIcon: tabIcon('⭐') }}
+        options={{ title: 'Odmeny', tabBarIcon: tabIcon('⭐') }}
       />
       <Tab.Screen
         name="Shopping"
         component={ShoppingScreen}
-        options={{ title: 'Shopping', tabBarIcon: tabIcon('🛒') }}
+        options={{ title: 'Nákup', tabBarIcon: tabIcon('🛒') }}
       />
       <Tab.Screen
         name="Calendar"
         component={CalendarScreen}
-        options={{ title: 'Calendar', tabBarIcon: tabIcon('📅') }}
+        options={{ title: 'Kalendár', tabBarIcon: tabIcon('📅') }}
       />
       <Tab.Screen
         name="Noticeboard"
         component={NoticeboardScreen}
-        options={{ title: 'Notice', tabBarIcon: tabIcon('📌') }}
+        options={{ title: 'Nástenka', tabBarIcon: tabIcon('📌') }}
       />
       <Tab.Screen
         name="History"
         component={HistoryScreen}
-        options={{ title: 'History', tabBarIcon: tabIcon('📋') }}
+        options={{ title: 'História', tabBarIcon: tabIcon('📋') }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: 'Settings', tabBarIcon: tabIcon('⚙️') }}
+        options={{ title: 'Nastavenia', tabBarIcon: tabIcon('⚙️') }}
       />
     </Tab.Navigator>
   );
@@ -126,8 +126,9 @@ export default function App() {
       case 'lock':
         lockScreen().catch(console.warn);
         navigationRef.current?.navigate('Lock', {
-          cycleId:  data.cycleId,
-          assignee: data.assignee || 'YOU',
+          cycleId:   data.cycleId,
+          assignee:  data.assignee || 'TY',
+          choreType: data.choreType || 'dishwasher',
         });
         break;
 

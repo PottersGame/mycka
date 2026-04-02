@@ -52,8 +52,8 @@ export default function NoticeboardScreen() {
   useFocusEffect(useCallback(() => { load(); }, []));
 
   async function handlePost() {
-    if (!title.trim()) return Alert.alert('Error', 'Title is required');
-    if (!parentSecret) return Alert.alert('Parents only', 'Only parents can post notices. Set your parent secret in Settings.');
+    if (!title.trim()) return Alert.alert('Chyba', 'Nadpis je povinný');
+    if (!parentSecret) return Alert.alert('Len pre rodičov', 'Len rodičia môžu pridávať oznámenia.');
     setSaving(true);
     try {
       await addNoticeboardPost(title.trim(), body.trim(), parentSecret);
@@ -62,28 +62,28 @@ export default function NoticeboardScreen() {
       setShowModal(false);
       await load();
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(post) {
-    if (!parentSecret) return Alert.alert('Parents only', 'Only parents can delete notices.');
+    if (!parentSecret) return Alert.alert('Len pre rodičov', 'Len rodičia môžu odstraňovať oznámenia.');
     Alert.alert(
-      'Remove notice?',
-      `Remove "${post.title}"?`,
+      'Odstrániť oznámenie?',
+      `Odstrániť "${post.title}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Zrušiť', style: 'cancel' },
         {
-          text: 'Remove',
+          text: 'Odstrániť',
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteNoticeboardPost(post.id, parentSecret);
               setPosts(prev => prev.filter(p => p.id !== post.id));
             } catch (err) {
-              Alert.alert('Error', err.message);
+              Alert.alert('Chyba', err.message);
             }
           },
         },
@@ -106,8 +106,8 @@ export default function NoticeboardScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>📌 No notices yet</Text>
-            {!!parentSecret && <Text style={styles.emptySubText}>Tap + to post an announcement</Text>}
+            <Text style={styles.emptyText}>📌 Zatiaľ žiadne oznámenia</Text>
+            {!!parentSecret && <Text style={styles.emptySubText}>Stlač + pre pridanie oznámenia</Text>}
           </View>
         }
         renderItem={({ item, index }) => {
@@ -124,7 +124,7 @@ export default function NoticeboardScreen() {
               </View>
               {item.body ? <Text style={styles.postBody}>{item.body}</Text> : null}
               <Text style={styles.postMeta}>
-                {item.created_by ? `Posted by ${item.created_by} · ` : ''}{formatDate(item.created_at)}
+                {item.created_by ? `Pridal(a) ${item.created_by} · ` : ''}{formatDate(item.created_at)}
               </Text>
             </View>
           );
@@ -142,26 +142,26 @@ export default function NoticeboardScreen() {
       <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modal}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>New Notice</Text>
+            <Text style={styles.modalTitle}>Nové oznámenie</Text>
             <TouchableOpacity onPress={() => setShowModal(false)}>
               <Text style={styles.modalClose}>✕</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.modalBody}>
-            <Text style={styles.fieldLabel}>Title *</Text>
+            <Text style={styles.fieldLabel}>Nadpis *</Text>
             <TextInput
               style={styles.input}
               value={title}
               onChangeText={setTitle}
-              placeholder="e.g. No screens until chores done!"
+              placeholder="napr. Žiadne obrazovky kým nie sú povinnosti hotové!"
             />
 
-            <Text style={styles.fieldLabel}>Message (optional)</Text>
+            <Text style={styles.fieldLabel}>Správa (nepovinné)</Text>
             <TextInput
               style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
               value={body}
               onChangeText={setBody}
-              placeholder="Extra details…"
+              placeholder="Ďalšie detaily…"
               multiline
             />
 
@@ -170,7 +170,7 @@ export default function NoticeboardScreen() {
               onPress={handlePost}
               disabled={saving}
             >
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Post Notice</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Zverejniť</Text>}
             </TouchableOpacity>
           </ScrollView>
         </View>

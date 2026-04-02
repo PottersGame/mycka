@@ -11,11 +11,11 @@ import { fetchStatus, completeChore, getUserName } from '../services/api';
 import { cancelAllLocalNotifications } from '../services/notifications';
 
 const CHORE_LABELS = {
-  dishwasher: { label: 'Dishwasher', emoji: '🍽️' },
-  cleaning:   { label: 'Cleaning',   emoji: '🧹' },
-  trash:      { label: 'Trash',      emoji: '🗑️' },
-  meals:      { label: 'Meals',      emoji: '🍳' },
-  laundry:    { label: 'Laundry',    emoji: '👕' },
+  dishwasher: { label: 'Umývačka riadu', emoji: '🍽️' },
+  cleaning:   { label: 'Upratovanie',    emoji: '🧹' },
+  trash:      { label: 'Smeti',          emoji: '🗑️' },
+  meals:      { label: 'Varenie',        emoji: '🍳' },
+  laundry:    { label: 'Pranie',         emoji: '👕' },
 };
 
 function formatElapsed(seconds) {
@@ -87,23 +87,20 @@ export default function HomeScreen({ navigation }) {
     const isMyTurn = myName && myName.toLowerCase() === cycle.assignee.toLowerCase();
 
     if (!isMyTurn && myName) {
-      Alert.alert(
-        'Hold on!',
-        `It's ${cycle.assignee}'s turn, not yours.`,
-      );
+      Alert.alert('Počkaj!', `Je rad ${cycle.assignee}, nie tvoj.`);
       return;
     }
 
     const pts = getPointsPreview(elapsed, cycle.choreType);
-    const pointsMsg = pts > 0 ? `\n\nYou'll earn ${pts} points! ⭐` : '';
+    const pointsMsg = pts > 0 ? `\n\nZarobíš ${pts} bodov! ⭐` : '';
 
     Alert.alert(
-      '✅ All done?',
-      `Make sure everything is actually done before confirming!${pointsMsg}`,
+      '✅ Všetko hotovo?',
+      `Uisti sa, že je všetko skutočne hotové!${pointsMsg}`,
       [
-        { text: 'Not yet', style: 'cancel' },
+        { text: 'Ešte nie', style: 'cancel' },
         {
-          text: "Yes, I'm done!",
+          text: 'Áno, hotovo!',
           onPress: async () => {
             setCompleting(true);
             try {
@@ -112,13 +109,13 @@ export default function HomeScreen({ navigation }) {
               await loadStatus();
               const earned = result.pointsAwarded || 0;
               Alert.alert(
-                '🎉 Awesome!',
+                '🎉 Výborne!',
                 earned > 0
-                  ? `Great job! You earned ${earned} points! Check the Rewards tab.`
-                  : 'Great job! The next person will be notified next time.',
+                  ? `Skvelá práca! Zarobil/a si ${earned} bodov! Pozri záložku Odmeny.`
+                  : 'Skvelá práca! Ďalší bude upozornený nabudúce.',
               );
             } catch (err) {
-              Alert.alert('Error', err.message);
+              Alert.alert('Chyba', err.message);
             } finally {
               setCompleting(false);
             }
@@ -137,13 +134,13 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.centered}>
         <Text style={styles.errorText}>⚠️ {error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={loadStatus}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>Skúsiť znova</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: '#666', marginTop: 8 }]}
           onPress={() => navigation.navigate('Settings')}
         >
-          <Text style={styles.retryText}>Go to Settings</Text>
+          <Text style={styles.retryText}>Ísť do nastavení</Text>
         </TouchableOpacity>
       </View>
     );
@@ -162,30 +159,28 @@ export default function HomeScreen({ navigation }) {
     >
       {active ? (
         <View style={[styles.card, { borderColor: urgencyColor, borderWidth: 3 }]}>
-          {/* Chore type badge */}
           <View style={styles.choreBadge}>
             <Text style={styles.choreEmoji}>{choreMeta.emoji}</Text>
             <Text style={styles.choreLabel}>{choreMeta.label.toUpperCase()}</Text>
           </View>
 
-          <Text style={styles.waitingLabel}>Waiting since…</Text>
+          <Text style={styles.waitingLabel}>Čaká od…</Text>
           <Text style={[styles.elapsedText, { color: urgencyColor }]}>
             {formatElapsed(elapsed)}
           </Text>
 
           <View style={[styles.assigneeBadge, { backgroundColor: urgencyColor }]}>
-            <Text style={styles.assigneeLabel}>IT'S {active.assignee.toUpperCase()}'S TURN</Text>
+            <Text style={styles.assigneeLabel}>JE TO NA {active.assignee.toUpperCase()}</Text>
           </View>
 
-          {/* Points preview */}
           {pointsPreview > 0 && (
             <Text style={styles.pointsPreview}>
-              ⭐ Do it now = {pointsPreview} points
+              ⭐ Urob to teraz = {pointsPreview} bodov
             </Text>
           )}
 
-          {active.shamesSent && <Text style={styles.shameTag}>😤 Family has been notified</Text>}
-          {active.lockSent   && <Text style={styles.lockTag}>🔒 Phone lock sent</Text>}
+          {active.shamesSent && <Text style={styles.shameTag}>😤 Rodina bola upozornená</Text>}
+          {active.lockSent   && <Text style={styles.lockTag}>🔒 Zamknutie odoslané</Text>}
 
           {isMyTurn ? (
             <TouchableOpacity
@@ -195,33 +190,32 @@ export default function HomeScreen({ navigation }) {
             >
               {completing
                 ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.doneButtonText}>✅  I'M DONE!</Text>
+                : <Text style={styles.doneButtonText}>✅  HOTOVO!</Text>
               }
             </TouchableOpacity>
           ) : (
             <Text style={styles.notYourTurnText}>
-              {myName ? `It's not your turn, ${myName}.` : 'Set your name in Settings.'}
+              {myName ? `Nie je tvoj rad, ${myName}.` : 'Nastav meno v Nastaveniach.'}
             </Text>
           )}
         </View>
       ) : (
         <View style={[styles.card, { borderColor: '#4caf50', borderWidth: 3 }]}>
-          <Text style={styles.allClearText}>✅ All clear!</Text>
-          <Text style={styles.allClearSub}>No chores waiting right now.</Text>
-          <Text style={styles.allClearSub}>You'll be notified when something needs doing.</Text>
+          <Text style={styles.allClearText}>✅ Všetko OK!</Text>
+          <Text style={styles.allClearSub}>Momentálne žiadne povinnosti.</Text>
+          <Text style={styles.allClearSub}>Dostaneš upozornenie keď bude treba niečo urobiť.</Text>
         </View>
       )}
 
-      {/* Rotation order */}
       <View style={styles.rotationCard}>
-        <Text style={styles.rotationTitle}>📋 Rotation order</Text>
+        <Text style={styles.rotationTitle}>📋 Poradie</Text>
         {status?.kids?.map((kid, i) => (
           <View key={kid.name} style={styles.kidRow}>
             <Text style={styles.kidIndex}>{i + 1}.</Text>
             <Text style={[styles.kidName, kid.name === active?.assignee && styles.activeKid]}>
               {kid.name}
               {kid.name === active?.assignee ? ' 👈' : ''}
-              {!kid.hasToken ? ' (no phone)' : ''}
+              {!kid.hasToken ? ' (bez telefónu)' : ''}
             </Text>
           </View>
         ))}

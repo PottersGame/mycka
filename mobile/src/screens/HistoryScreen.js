@@ -15,13 +15,13 @@ function formatDate(unixTs) {
 }
 
 function formatDuration(startTs, endTs) {
-  if (!endTs) return 'Still pending…';
+  if (!endTs) return 'Prebieha…';
   const secs = endTs - startTs;
   const m = Math.floor(secs / 60);
-  if (m < 60) return `Done in ${m}m`;
+  if (m < 60) return `Hotovo za ${m}m`;
   const h = Math.floor(m / 60);
   const rm = m % 60;
-  return `Done in ${h}h ${rm}m`;
+  return `Hotovo za ${h}h ${rm}m`;
 }
 
 export default function HistoryScreen() {
@@ -58,7 +58,7 @@ export default function HistoryScreen() {
         </View>
         <View style={styles.rowRight}>
           <Text style={[styles.rowStatus, done ? (slow ? styles.statusSlow : styles.statusOk) : styles.statusPending]}>
-            {done ? (slow ? '🐌 Slow' : '✅ Done') : '⏳ Pending'}
+            {done ? (slow ? '🐌 Pomaly' : '✅ Hotovo') : '⏳ Čaká'}
           </Text>
           <Text style={styles.rowDuration}>{duration}</Text>
         </View>
@@ -79,7 +79,7 @@ export default function HistoryScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
       ListEmptyComponent={
         <View style={styles.centered}>
-          <Text style={styles.emptyText}>No history yet. Waiting for the dishwasher to finish! 🍽️</Text>
+          <Text style={styles.emptyText}>Zatiaľ žiadna história. Čakáme na ďalšiu povinnosť! 🏠</Text>
         </View>
       }
       ListHeaderComponent={

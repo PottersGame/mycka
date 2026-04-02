@@ -106,11 +106,11 @@ try {
 // ─── Chore metadata ───────────────────────────────────────────────────────────
 
 const CHORE_META = {
-  dishwasher: { label: 'Dishwasher',        emoji: '🍽️',  basePoints: 10 },
-  cleaning:   { label: 'Cleaning',           emoji: '🧹',  basePoints: 15 },
-  trash:      { label: 'Trash / Recycling',  emoji: '🗑️',  basePoints: 10 },
-  meals:      { label: 'Meals & Kitchen',    emoji: '🍳',  basePoints: 10 },
-  laundry:    { label: 'Laundry',            emoji: '👕',  basePoints: 15 },
+  dishwasher: { label: 'Umývačka riadu',  emoji: '🍽️',  basePoints: 10 },
+  cleaning:   { label: 'Upratovanie',     emoji: '🧹',  basePoints: 15 },
+  trash:      { label: 'Smeti',           emoji: '🗑️',  basePoints: 10 },
+  meals:      { label: 'Varenie',         emoji: '🍳',  basePoints: 10 },
+  laundry:    { label: 'Pranie',          emoji: '👕',  basePoints: 15 },
 };
 
 function getChoreMeta(choreType) {

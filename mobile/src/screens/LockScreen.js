@@ -1,17 +1,5 @@
 'use strict';
 
-/**
- * LockScreen — full-screen blocking overlay shown when the lock command is received.
- *
- * This screen appears over everything (via React Navigation's modal presentation)
- * and cannot be easily dismissed. The kid must press "I'm Done" which calls the
- * backend to complete the cycle, then this screen dismisses.
- *
- * On Android, the native DeviceAdminModule.lockNow() is called first to black
- * out the screen. When the kid unlocks with their PIN, the app comes back to
- * foreground and shows this screen.
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
@@ -24,23 +12,49 @@ import { cancelAllLocalNotifications } from '../services/notifications';
 
 const VIBRATION_PATTERN = [0, 500, 500, 500, 500, 500];
 
+const CHORE_LOCK_TEXT = {
+  dishwasher: {
+    subtitle: 'NEVYLOŽIL/A SI UMÝVAČKU RIADU!',
+    body:     'Umývačka čaká hodiny.\nVyložiť riad, potom stlač tlačidlo.',
+    button:   '✅  UMÝVAČKA VYLOŽENÁ',
+  },
+  cleaning: {
+    subtitle: 'NEUPRATAL/A SI!',
+    body:     'Upratovanie čaká hodiny.\nUpratať, potom stlač tlačidlo.',
+    button:   '✅  UPRATANÉ',
+  },
+  trash: {
+    subtitle: 'NEVYHADZOVAL/A SI SMETI!',
+    body:     'Smeti čakajú hodiny.\nVyhodiť smeti, potom stlač tlačidlo.',
+    button:   '✅  SMETI VYHODENÉ',
+  },
+  meals: {
+    subtitle: 'NEPOSTARAL/A SI SA O JEDLO!',
+    body:     'Jedlo čaká hodiny.\nPostarať sa o jedlo, potom stlač tlačidlo.',
+    button:   '✅  JEDLO HOTOVÉ',
+  },
+  laundry: {
+    subtitle: 'NEDAL/A SI PRANIE!',
+    body:     'Pranie čaká hodiny.\nDať pranie, potom stlač tlačidlo.',
+    button:   '✅  PRANIE DANÉ',
+  },
+};
+
 export default function LockScreen({ navigation, route }) {
-  useKeepAwake(); // Keep the screen on
+  useKeepAwake();
 
-  const cycleId  = route?.params?.cycleId;
-  const assignee = route?.params?.assignee || 'YOU';
+  const cycleId   = route?.params?.cycleId;
+  const assignee  = route?.params?.assignee || 'TY';
+  const choreType = route?.params?.choreType || 'dishwasher';
 
-  const [completing, setCompleting]   = useState(false);
-  const [myName, setMyName]           = useState('');
-  const [countdown, setCountdown]     = useState(null);
+  const text = CHORE_LOCK_TEXT[choreType] || CHORE_LOCK_TEXT.dishwasher;
+
+  const [completing, setCompleting] = useState(false);
+  const [myName, setMyName]         = useState('');
 
   useEffect(() => {
     getUserName().then(setMyName);
-
-    // Vibrate aggressively when the lock screen appears
     Vibration.vibrate(VIBRATION_PATTERN, true);
-
-    // Stop vibration after 10 seconds to avoid battery drain
     const stopVib = setTimeout(() => Vibration.cancel(), 10_000);
     return () => {
       clearTimeout(stopVib);
@@ -56,11 +70,11 @@ export default function LockScreen({ navigation, route }) {
       await cancelAllLocalNotifications();
       Vibration.cancel();
 
-      Alert.alert('🎉 Great!', 'Chore marked as done. Phone unlocked!', [
+      Alert.alert('🎉 Výborne!', 'Povinnosť splnená. Telefón odomknutý!', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (err) {
-      Alert.alert('Error', `Could not mark as done: ${err.message}\n\nMake sure you have internet connection.`);
+      Alert.alert('Chyba', `Nepodarilo sa označiť ako hotové: ${err.message}\n\nSkontroluj internetové pripojenie.`);
       setCompleting(false);
     }
   }
@@ -69,18 +83,15 @@ export default function LockScreen({ navigation, route }) {
     <View style={styles.container}>
       <Text style={styles.icon}>🔒</Text>
 
-      <Text style={styles.title}>PHONE LOCKED</Text>
+      <Text style={styles.title}>TELEFÓN ZAMKNUTÝ</Text>
 
       <Text style={styles.subtitle}>
-        {assignee.toUpperCase()} — YOU HAVEN'T{'\n'}DONE THE DISHES YET!
+        {assignee.toUpperCase()} —{'\n'}{text.subtitle}
       </Text>
 
       <View style={styles.divider} />
 
-      <Text style={styles.body}>
-        The dishwasher has been sitting there for hours.{'\n'}
-        Unload it, then tap the button below.
-      </Text>
+      <Text style={styles.body}>{text.body}</Text>
 
       <TouchableOpacity
         style={[styles.doneButton, completing && styles.doneButtonDisabled]}
@@ -89,13 +100,13 @@ export default function LockScreen({ navigation, route }) {
       >
         {completing
           ? <ActivityIndicator color="#fff" size="large" />
-          : <Text style={styles.doneButtonText}>✅  I DID THE DISHES</Text>
+          : <Text style={styles.doneButtonText}>{text.button}</Text>
         }
       </TouchableOpacity>
 
       <Text style={styles.fine}>
-        This button only works after the dishes are actually done.{'\n'}
-        Your parents will know if you're lying.
+        Toto tlačidlo funguje len keď je povinnosť skutočne splnená.{'\n'}
+        Rodičia budú vedieť, ak klamete.
       </Text>
     </View>
   );
@@ -118,12 +129,12 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   subtitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: '#ffcdd2',
     textAlign: 'center',
     marginTop: 12,
-    lineHeight: 30,
+    lineHeight: 28,
   },
   divider: {
     width: '80%',
@@ -151,7 +162,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   doneButtonDisabled: { backgroundColor: '#388e3c' },
-  doneButtonText: { color: '#fff', fontSize: 22, fontWeight: '900', letterSpacing: 1 },
+  doneButtonText: { color: '#fff', fontSize: 20, fontWeight: '900', letterSpacing: 1 },
   fine: {
     fontSize: 12,
     color: '#ef9a9a',

@@ -25,10 +25,13 @@ function seedFamilyMembers() {
     upsertMember({ name, rotation_order: idx, is_parent: false });
   });
 
-  const parentName = process.env.PARENT_NAME || 'Parent';
-  upsertMember({ name: parentName, rotation_order: 999, is_parent: true });
+  const parentNamesEnv = process.env.PARENT_NAMES || process.env.PARENT_NAME || 'Rodič';
+  const parents = parentNamesEnv.split(',').map(s => s.trim()).filter(Boolean);
+  parents.forEach((name, idx) => {
+    upsertMember({ name, rotation_order: 999 + idx, is_parent: true });
+  });
 
-  console.log(`[Setup] Family configured: kids=[${kids.join(', ')}], parent=${parentName}`);
+  console.log(`[Setup] Family configured: kids=[${kids.join(', ')}], parents=[${parents.join(', ')}]`);
 }
 
 // ─── Dishwasher done callback ─────────────────────────────────────────────────

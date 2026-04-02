@@ -14,11 +14,11 @@ import { isDeviceAdminActive, showDeviceAdminSetupGuide } from '../services/devi
 import { triggerManually, skipKid, resetCycle } from '../services/api';
 
 const CHORE_TYPES = [
-  { key: 'dishwasher', label: 'Dishwasher',       emoji: '🍽️' },
-  { key: 'cleaning',   label: 'Cleaning',          emoji: '🧹' },
-  { key: 'trash',      label: 'Trash / Recycling', emoji: '🗑️' },
-  { key: 'meals',      label: 'Meals & Kitchen',   emoji: '🍳' },
-  { key: 'laundry',    label: 'Laundry',           emoji: '👕' },
+  { key: 'dishwasher', label: 'Umývačka',  emoji: '🍽️' },
+  { key: 'cleaning',   label: 'Upratovanie', emoji: '🧹' },
+  { key: 'trash',      label: 'Smeti',     emoji: '🗑️' },
+  { key: 'meals',      label: 'Varenie',   emoji: '🍳' },
+  { key: 'laundry',    label: 'Pranie',    emoji: '👕' },
 ];
 
 export default function SettingsScreen() {
@@ -47,8 +47,8 @@ export default function SettingsScreen() {
   }, []);
 
   async function handleSave() {
-    if (!baseUrl.trim()) return Alert.alert('Error', 'Server URL is required');
-    if (!name.trim())    return Alert.alert('Error', 'Your name is required');
+    if (!baseUrl.trim()) return Alert.alert('Chyba', 'URL servera je povinné');
+    if (!name.trim())    return Alert.alert('Chyba', 'Meno je povinné');
 
     setSaving(true);
     try {
@@ -59,22 +59,22 @@ export default function SettingsScreen() {
       } else if (!isParent) {
         await saveParentSecret('');
       }
-      Alert.alert('✅ Saved', 'Settings saved successfully!');
+      Alert.alert('✅ Uložené', 'Nastavenia úspešne uložené!');
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function parentAction(label, fn) {
-    if (!parentSecret) return Alert.alert('Error', 'Enter parent secret first');
+    if (!parentSecret) return Alert.alert('Chyba', 'Najprv zadaj rodičovské heslo');
     setActionLoading(true);
     try {
       const result = await fn(parentSecret);
       Alert.alert('Done', result.message || JSON.stringify(result));
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert('Chyba', err.message);
     } finally {
       setActionLoading(false);
     }
@@ -83,18 +83,18 @@ export default function SettingsScreen() {
   return (
     <ScrollView style={styles.container}>
       {/* ── Identity ── */}
-      <Text style={styles.section}>Your Identity</Text>
+      <Text style={styles.section}>Tvoja identita</Text>
 
-      <Text style={styles.label}>Your name (must match the name on the server)</Text>
+      <Text style={styles.label}>Tvoje meno (musí súhlasiť s menom na serveri)</Text>
       <TextInput
         style={styles.input}
         value={name}
         onChangeText={setName}
-        placeholder="e.g. Emma"
+        placeholder="napr. Adam"
         autoCapitalize="words"
       />
 
-      <Text style={styles.label}>Backend server URL</Text>
+      <Text style={styles.label}>URL servera</Text>
       <TextInput
         style={styles.input}
         value={baseUrl}
@@ -106,52 +106,52 @@ export default function SettingsScreen() {
 
       {/* ── Parent mode ── */}
       <View style={styles.row}>
-        <Text style={styles.label}>I'm a parent (admin mode)</Text>
+        <Text style={styles.label}>Som rodič (admin)</Text>
         <Switch value={isParent} onValueChange={setIsParent} />
       </View>
 
       {isParent && (
         <>
-          <Text style={styles.label}>Parent secret (from server .env)</Text>
+          <Text style={styles.label}>Rodičovské heslo (zo servera .env)</Text>
           <TextInput
             style={styles.input}
             value={parentSecret}
             onChangeText={setParentSecret}
-            placeholder="Your PARENT_SECRET value"
+            placeholder="Hodnota PARENT_SECRET"
             secureTextEntry
           />
         </>
       )}
 
       <TouchableOpacity style={[styles.saveButton, saving && styles.disabled]} onPress={handleSave} disabled={saving}>
-        {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save Settings</Text>}
+        {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Uložiť nastavenia</Text>}
       </TouchableOpacity>
 
       {/* ── Device Admin ── */}
-      <Text style={styles.section}>Phone Lock (Device Admin)</Text>
+      <Text style={styles.section}>Zamknutie telefóna</Text>
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>
-          Status: {adminActive ? '✅ Active — this phone can be locked remotely' : '⚠️ Not active'}
+          Stav: {adminActive ? '✅ Aktívne — telefón môže byť zamknutý na diaľku' : '⚠️ Neaktívne'}
         </Text>
         {!adminActive && (
           <TouchableOpacity style={styles.adminButton} onPress={showDeviceAdminSetupGuide}>
-            <Text style={styles.adminButtonText}>🔒 Activate Phone Lock</Text>
+            <Text style={styles.adminButtonText}>🔒 Aktivovať zamknutie</Text>
           </TouchableOpacity>
         )}
       </View>
       <Text style={styles.hint}>
-        Each kid needs to activate this once. When they ignore chores for 3 hours,
-        the app locks their phone screen until they press "I'm Done."
+        Každé dieťa musí aktivovať raz. Keď ignoruje povinnosti 3 hodiny,
+        aplikácia zamkne obrazovku telefónu, kým nestlačí „Hotovo".
       </Text>
 
       {/* ── Parent admin controls ── */}
       {isParent && (
         <>
-          <Text style={styles.section}>Parent Controls</Text>
+          <Text style={styles.section}>Rodičovské ovládanie</Text>
           {actionLoading && <ActivityIndicator color="#1a73e8" style={{ marginBottom: 8 }} />}
 
           {/* Chore type picker */}
-          <Text style={styles.label}>Chore type to trigger</Text>
+          <Text style={styles.label}>Typ povinnosti</Text>
           <View style={styles.choresGrid}>
             {CHORE_TYPES.map(ct => (
               <TouchableOpacity
@@ -173,7 +173,7 @@ export default function SettingsScreen() {
             disabled={actionLoading}
           >
             <Text style={styles.actionText}>
-              {CHORE_TYPES.find(c => c.key === selectedChore)?.emoji}  Trigger {CHORE_TYPES.find(c => c.key === selectedChore)?.label} chore
+              {CHORE_TYPES.find(c => c.key === selectedChore)?.emoji}  Spustiť: {CHORE_TYPES.find(c => c.key === selectedChore)?.label}
             </Text>
           </TouchableOpacity>
 
@@ -182,20 +182,20 @@ export default function SettingsScreen() {
             onPress={() => parentAction('Skip', skipKid)}
             disabled={actionLoading}
           >
-            <Text style={styles.actionText}>⏭️  Skip current kid</Text>
+            <Text style={styles.actionText}>⏭️  Preskočiť dieťa</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#f44336' }]}
             onPress={() => {
-              Alert.alert('Reset cycle?', 'This will clear the active cycle without marking it done.', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Reset', style: 'destructive', onPress: () => parentAction('Reset', resetCycle) },
+              Alert.alert('Resetovať cyklus?', 'Tým sa vymaže aktívny cyklus bez označenia ako hotový.', [
+                { text: 'Zrušiť', style: 'cancel' },
+                { text: 'Resetovať', style: 'destructive', onPress: () => parentAction('Reset', resetCycle) },
               ]);
             }}
             disabled={actionLoading}
           >
-            <Text style={styles.actionText}>🗑️  Reset active cycle</Text>
+            <Text style={styles.actionText}>🗑️  Resetovať cyklus</Text>
           </TouchableOpacity>
         </>
       )}
