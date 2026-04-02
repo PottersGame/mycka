@@ -2,26 +2,13 @@
 
 /**
  * Push notifications via Expo's push service.
- *
- * Expo abstracts FCM (Android) so we don't need a Firebase service account key.
- * Each device registers an Expo Push Token that looks like:
- *   ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
- *
- * Docs: https://docs.expo.dev/push-notifications/sending-notifications/
  */
 
 const axios = require('axios');
+const { getChoreMeta } = require('./db');
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
-/**
- * Send a push notification to one or more Expo push tokens.
- * @param {string|string[]} tokens  - Expo push token(s)
- * @param {string} title
- * @param {string} body
- * @param {object} [data]           - Custom data payload delivered to the app
- * @param {'default'|'max'} [priority]
- */
 async function sendPush(tokens, title, body, data = {}, priority = 'default') {
   const tokenList = Array.isArray(tokens) ? tokens : [tokens];
   const validTokens = tokenList.filter(Boolean);
@@ -38,8 +25,7 @@ async function sendPush(tokens, title, body, data = {}, priority = 'default') {
     data,
     priority,
     sound: 'default',
-    channelId: 'chores',  // Android notification channel (defined in the app)
-    // Show as heads-up notification on Android
+    channelId: 'chores',
     androidMode: 'default',
   }));
 
@@ -67,27 +53,32 @@ async function sendPush(tokens, title, body, data = {}, priority = 'default') {
 
 // ─── Message builders ─────────────────────────────────────────────────────────
 
-function buildInitialMessage(kidName) {
+function buildInitialMessage(kidName, choreType = 'dishwasher') {
+  const { label, emoji } = getChoreMeta(choreType);
   return {
-    title: `🍽️ Hey ${kidName}! Dishwasher duty!`,
-    body: 'The dishwasher is done. It\'s YOUR turn to unload it. Do it now!',
+    title: `${emoji} Hey ${kidName}! ${label} duty!`,
+    body: choreType === 'dishwasher'
+      ? "The dishwasher is done. It's YOUR turn to unload it. Do it now!"
+      : `It's your turn to handle ${label.toLowerCase()}. Do it now!`,
   };
 }
 
-function buildReminderMessage(kidName, reminderNumber) {
+function buildReminderMessage(kidName, reminderNumber, choreType = 'dishwasher') {
+  const { label } = getChoreMeta(choreType);
   const prefixes = ['Still waiting…', 'Hey! HELLO?', 'Are you ignoring this?', 'LAST WARNING!'];
   const prefix = prefixes[Math.min(reminderNumber - 1, prefixes.length - 1)];
   return {
-    title: `⚠️ ${prefix} ${kidName}, dishes are still waiting`,
-    body: `You've had ${reminderNumber * 30} minutes. Unload the dishwasher NOW or this gets worse.`,
+    title: `⚠️ ${prefix} ${kidName}, ${label.toLowerCase()} is still waiting`,
+    body: `You've had ${reminderNumber * 30} minutes. Do it NOW or this gets worse.`,
   };
 }
 
-function buildShameMessage(kidName, allKidNames) {
+function buildShameMessage(kidName, allKidNames, choreType = 'dishwasher') {
+  const { label } = getChoreMeta(choreType);
   const others = allKidNames.filter(n => n !== kidName).join(', ');
   return {
-    title: `😤 ${kidName} still hasn't done the dishes!`,
-    body: `${kidName} has been ignoring the dishwasher for 2 hours. Everybody knows now, ${others}! 📢`,
+    title: `😤 ${kidName} still hasn't done ${label.toLowerCase()}!`,
+    body: `${kidName} has been ignoring it for 2 hours. Everybody knows now${others ? `, ${others}` : ''}! 📢`,
   };
 }
 
@@ -100,15 +91,17 @@ function buildLockWarningMessage(kidName) {
 
 function buildLockMessage(kidName) {
   return {
-    title: `🔒 Phone locked — do the dishes ${kidName}`,
-    body: 'Open the DishwasherDuty app and press "I\'m Done" to unlock your phone.',
+    title: `🔒 Phone locked — do your chore ${kidName}`,
+    body: "Open the app and press \"I'm Done\" to unlock your phone.",
   };
 }
 
-function buildDoneMessage(kidName) {
+function buildDoneMessage(kidName, choreType = 'dishwasher', points = 0) {
+  const { label, emoji } = getChoreMeta(choreType);
+  const pointsText = points > 0 ? ` +${points} points!` : '';
   return {
-    title: `✅ ${kidName} did the dishes!`,
-    body: 'The dishwasher has been unloaded. Nice work! 🎉',
+    title: `✅ ${kidName} did ${label.toLowerCase()}!${pointsText}`,
+    body: `Nice work ${kidName}! 🎉${points > 0 ? ` You earned ${points} points.` : ''}`,
   };
 }
 

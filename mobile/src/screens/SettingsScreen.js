@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * SettingsScreen — each family member sets their name and the server URL here.
- * Parents also see admin controls (trigger manually, skip, reset, device admin).
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
@@ -18,14 +13,23 @@ import {
 import { isDeviceAdminActive, showDeviceAdminSetupGuide } from '../services/deviceAdmin';
 import { triggerManually, skipKid, resetCycle } from '../services/api';
 
+const CHORE_TYPES = [
+  { key: 'dishwasher', label: 'Dishwasher',       emoji: '🍽️' },
+  { key: 'cleaning',   label: 'Cleaning',          emoji: '🧹' },
+  { key: 'trash',      label: 'Trash / Recycling', emoji: '🗑️' },
+  { key: 'meals',      label: 'Meals & Kitchen',   emoji: '🍳' },
+  { key: 'laundry',    label: 'Laundry',           emoji: '👕' },
+];
+
 export default function SettingsScreen() {
-  const [baseUrl, setBaseUrl]         = useState('');
-  const [name, setName]               = useState('');
+  const [baseUrl, setBaseUrl]           = useState('');
+  const [name, setName]                 = useState('');
   const [parentSecret, setParentSecret] = useState('');
-  const [isParent, setIsParent]       = useState(false);
-  const [adminActive, setAdminActive] = useState(false);
-  const [saving, setSaving]           = useState(false);
+  const [isParent, setIsParent]         = useState(false);
+  const [adminActive, setAdminActive]   = useState(false);
+  const [saving, setSaving]             = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedChore, setSelectedChore] = useState('dishwasher');
 
   useEffect(() => {
     (async () => {
@@ -146,12 +150,31 @@ export default function SettingsScreen() {
           <Text style={styles.section}>Parent Controls</Text>
           {actionLoading && <ActivityIndicator color="#1a73e8" style={{ marginBottom: 8 }} />}
 
+          {/* Chore type picker */}
+          <Text style={styles.label}>Chore type to trigger</Text>
+          <View style={styles.choresGrid}>
+            {CHORE_TYPES.map(ct => (
+              <TouchableOpacity
+                key={ct.key}
+                style={[styles.choreChip, selectedChore === ct.key && styles.choreChipActive]}
+                onPress={() => setSelectedChore(ct.key)}
+              >
+                <Text style={styles.choreChipEmoji}>{ct.emoji}</Text>
+                <Text style={[styles.choreChipLabel, selectedChore === ct.key && styles.choreChipLabelActive]}>
+                  {ct.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => parentAction('Trigger', triggerManually)}
+            onPress={() => parentAction('Trigger', (secret) => triggerManually(secret, selectedChore))}
             disabled={actionLoading}
           >
-            <Text style={styles.actionText}>🍽️  Trigger new cycle (dishwasher done)</Text>
+            <Text style={styles.actionText}>
+              {CHORE_TYPES.find(c => c.key === selectedChore)?.emoji}  Trigger {CHORE_TYPES.find(c => c.key === selectedChore)?.label} chore
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -204,6 +227,23 @@ const styles = StyleSheet.create({
   adminButton:     { backgroundColor: '#b71c1c', borderRadius: 10, padding: 12, alignItems: 'center' },
   adminButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   hint:       { fontSize: 12, color: '#888', marginTop: 8, lineHeight: 18 },
+
+  choresGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  choreChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 2,
+    borderColor: '#ddd',
+  },
+  choreChipActive: { borderColor: '#1a73e8', backgroundColor: '#e8f0fe' },
+  choreChipEmoji: { fontSize: 16, marginRight: 4 },
+  choreChipLabel: { fontSize: 13, color: '#555', fontWeight: '600' },
+  choreChipLabelActive: { color: '#1a73e8' },
+
   actionButton:    { backgroundColor: '#4caf50', borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 8 },
   actionText:      { color: '#fff', fontSize: 15, fontWeight: '600' },
 });

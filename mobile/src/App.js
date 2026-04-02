@@ -1,14 +1,5 @@
 'use strict';
 
-/**
- * App entry point.
- *
- * Sets up:
- *  - React Navigation (Home / History / Settings + Lock modal)
- *  - Expo notification listeners (handle push notifications when app is open)
- *  - Registers the Expo push token with the backend on first launch
- */
-
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -16,10 +7,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, Alert, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 
-import HomeScreen     from './screens/HomeScreen';
-import HistoryScreen  from './screens/HistoryScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import LockScreen     from './screens/LockScreen';
+import HomeScreen        from './screens/HomeScreen';
+import HistoryScreen     from './screens/HistoryScreen';
+import RewardsScreen     from './screens/RewardsScreen';
+import ShoppingScreen    from './screens/ShoppingScreen';
+import CalendarScreen    from './screens/CalendarScreen';
+import NoticeboardScreen from './screens/NoticeboardScreen';
+import SettingsScreen    from './screens/SettingsScreen';
+import LockScreen        from './screens/LockScreen';
 
 import {
   registerForPushNotifications,
@@ -43,12 +38,33 @@ function MainTabs() {
         headerStyle: { backgroundColor: '#1a73e8' },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '800' },
+        tabBarLabelStyle: { fontSize: 10 },
       }}
     >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'DishwasherDuty 🍽️', tabBarIcon: tabIcon('🍽️') }}
+        options={{ title: 'FamilyDuty', tabBarIcon: tabIcon('🏠') }}
+      />
+      <Tab.Screen
+        name="Rewards"
+        component={RewardsScreen}
+        options={{ title: 'Rewards', tabBarIcon: tabIcon('⭐') }}
+      />
+      <Tab.Screen
+        name="Shopping"
+        component={ShoppingScreen}
+        options={{ title: 'Shopping', tabBarIcon: tabIcon('🛒') }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{ title: 'Calendar', tabBarIcon: tabIcon('📅') }}
+      />
+      <Tab.Screen
+        name="Noticeboard"
+        component={NoticeboardScreen}
+        options={{ title: 'Notice', tabBarIcon: tabIcon('📌') }}
       />
       <Tab.Screen
         name="History"
@@ -73,20 +89,18 @@ export default function App() {
     configureForegroundHandler();
     setupPushNotifications();
 
-    // Listen for notifications received while app is in foreground
     notifListener.current = Notifications.addNotificationReceivedListener(notification => {
       const data = notification.request.content.data || {};
       handleNotificationData(data);
     });
 
-    // Listen for user tapping a notification (app in background/closed)
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       const data = response.notification.request.content.data || {};
-      handleNotificationData(data, true /* tapped */);
+      handleNotificationData(data, true);
     });
 
     return () => {
-      if (notifListener.current)  Notifications.removeNotificationSubscription(notifListener.current);
+      if (notifListener.current)   Notifications.removeNotificationSubscription(notifListener.current);
       if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
@@ -97,13 +111,9 @@ export default function App() {
       if (!token) return;
 
       const [name, baseUrl] = await Promise.all([getUserName(), getBaseUrl()]);
-      if (!name || !baseUrl) {
-        console.log('[App] Name or URL not set yet — skipping token registration');
-        return;
-      }
+      if (!name || !baseUrl) return;
 
       await registerToken(name, token);
-      console.log('[App] Push token registered for', name);
     } catch (err) {
       console.warn('[App] Push setup error:', err.message);
     }
@@ -114,31 +124,28 @@ export default function App() {
 
     switch (data.type) {
       case 'lock':
-        // Lock the screen natively, then navigate to the lock screen
         lockScreen().catch(console.warn);
         navigationRef.current?.navigate('Lock', {
-          cycleId: data.cycleId,
+          cycleId:  data.cycleId,
           assignee: data.assignee || 'YOU',
         });
         break;
 
       case 'lock_warning':
-        if (wasTapped) {
-          navigationRef.current?.navigate('Home');
-        }
+        if (wasTapped) navigationRef.current?.navigate('Home');
         break;
 
       case 'assigned':
       case 'reminder':
-        if (wasTapped) {
-          navigationRef.current?.navigate('Home');
-        }
+        if (wasTapped) navigationRef.current?.navigate('Home');
+        break;
+
+      case 'done':
+        if (wasTapped) navigationRef.current?.navigate('Rewards');
         break;
 
       case 'shame':
-        if (wasTapped) {
-          navigationRef.current?.navigate('History');
-        }
+        if (wasTapped) navigationRef.current?.navigate('History');
         break;
 
       default:
@@ -160,7 +167,7 @@ export default function App() {
           options={{
             presentation: 'fullScreenModal',
             headerShown: false,
-            gestureEnabled: false,   // Can't swipe to dismiss
+            gestureEnabled: false,
           }}
         />
       </Stack.Navigator>

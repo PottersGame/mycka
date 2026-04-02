@@ -47,6 +47,8 @@ async function apiFetch(path, options = {}) {
   return response.json();
 }
 
+// ─── Chores ───────────────────────────────────────────────────────────────────
+
 export async function fetchStatus() {
   return apiFetch('/api/status');
 }
@@ -69,10 +71,93 @@ export async function fetchHistory() {
   return apiFetch('/api/history');
 }
 
-export async function triggerManually(parentSecret) {
+// ─── Points ───────────────────────────────────────────────────────────────────
+
+export async function fetchLeaderboard() {
+  return apiFetch('/api/points');
+}
+
+export async function fetchMemberPoints(name) {
+  return apiFetch(`/api/points/${encodeURIComponent(name)}`);
+}
+
+// ─── Shopping list ────────────────────────────────────────────────────────────
+
+export async function fetchShopping() {
+  return apiFetch('/api/shopping');
+}
+
+export async function addShoppingItem(text, addedBy) {
+  return apiFetch('/api/shopping', {
+    method: 'POST',
+    body: JSON.stringify({ text, addedBy }),
+  });
+}
+
+export async function toggleShoppingItem(id, done) {
+  return apiFetch(`/api/shopping/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ done }),
+  });
+}
+
+export async function deleteShoppingItem(id) {
+  return apiFetch(`/api/shopping/${id}`, { method: 'DELETE' });
+}
+
+export async function clearDoneShopping() {
+  return apiFetch('/api/shopping/done', { method: 'DELETE' });
+}
+
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+
+export async function fetchCalendar() {
+  return apiFetch('/api/calendar');
+}
+
+export async function addCalendarEvent(title, dateStr, timeStr, description, parentSecret) {
+  return apiFetch('/api/calendar', {
+    method: 'POST',
+    headers: { 'X-Parent-Secret': parentSecret },
+    body: JSON.stringify({ title, dateStr, timeStr, description }),
+  });
+}
+
+export async function deleteCalendarEvent(id, parentSecret) {
+  return apiFetch(`/api/calendar/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Parent-Secret': parentSecret },
+  });
+}
+
+// ─── Noticeboard ──────────────────────────────────────────────────────────────
+
+export async function fetchNoticeboard() {
+  return apiFetch('/api/noticeboard');
+}
+
+export async function addNoticeboardPost(title, body, parentSecret) {
+  return apiFetch('/api/noticeboard', {
+    method: 'POST',
+    headers: { 'X-Parent-Secret': parentSecret },
+    body: JSON.stringify({ title, body }),
+  });
+}
+
+export async function deleteNoticeboardPost(id, parentSecret) {
+  return apiFetch(`/api/noticeboard/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Parent-Secret': parentSecret },
+  });
+}
+
+// ─── Parent chore controls ────────────────────────────────────────────────────
+
+export async function triggerManually(parentSecret, choreType = 'dishwasher') {
   return apiFetch('/api/trigger', {
     method: 'POST',
     headers: { 'X-Parent-Secret': parentSecret },
+    body: JSON.stringify({ choreType }),
   });
 }
 

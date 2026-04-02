@@ -52,7 +52,7 @@ async function runEscalation() {
 
   if (expectedReminders > remindersSent && elapsed < SHAME_SECONDS) {
     const nextLevel = remindersSent + 1;
-    const msg = buildReminderMessage(kidName, nextLevel);
+    const msg = buildReminderMessage(kidName, nextLevel, cycle.chore_type);
     await sendPush(kidToken, msg.title, msg.body, { type: 'reminder', cycleId: cycle.id }, 'max');
 
     // Also ping the parent after the 3rd reminder
@@ -73,7 +73,7 @@ async function runEscalation() {
   // ── 2. Shame notification to ALL family ───────────────────────────────────
   if (elapsed >= SHAME_SECONDS && !cycle.shame_sent) {
     const allKidNames = kids.map(k => k.name);
-    const msg = buildShameMessage(kidName, allKidNames);
+    const msg = buildShameMessage(kidName, allKidNames, cycle.chore_type);
 
     const allTokens = [
       ...kids.map(k => k.push_token),
